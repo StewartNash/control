@@ -38,3 +38,29 @@ class TakeoffPoint {
 class BlockDiagram {
 
 };
+
+// DSP Signal FLow Graphs
+
+class Delay {
+
+};
+
+class Adder {
+
+};
+
+class Multiplier {
+
+};
+
+class BranchPoint {
+
+};
+
+class FilterStructureDiagram {
+	public:
+		std::vector<Delay> delays;
+		std::vector<Adder> adders;
+		std::vector<Multiplier> multipliers;
+		std::vector<BranchPoint> branches;
+};
