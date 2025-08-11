@@ -16,7 +16,9 @@ add_library(imgui
 target_include_directories(imgui PUBLIC
     ${IMGUI_DIR}
     ${IMGUI_DIR}/backends
+    ${CMAKE_SOURCE_DIR}/external/SDL/include
 )
-add_executable(control main.cpp)
 
-target_link_libraries(control PRIVATE SDL3::SDL3 imgui)
+target_link_libraries(imgui PUBLIC SDL3::SDL3)
+add_executable(control main.cpp)
+target_link_libraries(control PRIVATE imgui)
