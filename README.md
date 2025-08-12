@@ -3,7 +3,9 @@ Signal processing and control application
 
 ## Introduction
 
+### Philosophy
 
+For longevity, dependencies on third-party libraries in the code base should be segregated by an interface layer. So when third party libraries change their implementation or become obsolete it is easy to change libraries. To the extent possible, this philosophy should be adopted in all code that any person or organization produces.
 
 ## Build Instructions
 When cloning the repository, please use
@@ -38,6 +40,6 @@ cmake --build .
 
 ## TODO
 - Files shall have the extension '.blk'
-
+- Research and implement Python bindings
 
 ## Future Work
