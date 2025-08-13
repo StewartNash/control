@@ -95,9 +95,13 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
 	ImGui::NewFrame();
 	
 	// Example window
-	ImGui::Begin("Hello, world!");
-	ImGui::Text("Click in the window to add a white rectangle.");
-	ImGui::Text("Number of blocks: %zu", state->blocks.size());
+	ImGui::Begin("Drawing Menu");
+	ImGui::Text("Application: Filter Structure Diagram");
+	ImGui::Button("Branch");
+	ImGui::Button("Delay");
+	ImGui::Button("Multiplier");
+	ImGui::Button("Sum");
+	ImGui::Button("Node");
 	if (ImGui::Button("Clear")) {
 	  state->blocks.clear();
 	}
