@@ -40,6 +40,8 @@ cmake --build .
 
 ## TODO
 - Files shall have the extension '.blk'
+- .blk files are XML
 - Research and implement Python bindings
+- Use artificial intelligence and image processing to recognize and import filter structure diagrams
 
 ## Future Work

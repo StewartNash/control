@@ -13,15 +13,29 @@
 	edge is an unordered pair of vertices. (An edge where both verti-
 	ces are the same element is called a loop. Loops will not be con-
 	sidered.)
+	
+	An oriented graph -- a graph with directed edges --- is called a
+	directed graph or a digraph. Formally, a digraph D is a set V=V(D)
+	of vertices together with a set E=E(D) called directed edges (arcs)
+	such that a directed edge is an ordered pair of vertices. The dig-
+	raph is a generalization of the graph. For any associated graph G=
+	(V,E), there is a digraph with ordered pairs (u,v) and (v,u) for
+	any unordered pair (u,v) in the in E.
 */
 
 class IVertex {
 	public:
-		virtual ~IVertex() = default;
-		
+		virtual ~IVertex() = default;		
 		virtual bool equals(const IVertex& other) const = 0;
 		virtual std::string toString() const = 0;
 };
+
+class IShape {
+	public:
+		virtual ~Ishape() = default;
+		virtual void setPosition(double x, double y) = 0;
+		virtual void setSize(double width, double height) = 0;
+};	
 
 class Vertex : public IVertex {
 	protected:
@@ -57,6 +71,22 @@ class Vertex : public IVertex {
 		}			
 };
 
+class GraphicalVertex : public IVertex, public IShape {
+	public:
+		explicit GraphicalVertex() : x(0), y(0), width(0), height(0) {}
+		void setPosition(double x_, double y_) override {
+			x = x_;
+			y = y_;
+		}
+		void setSize(double w, double h) override {
+			width = w;
+			height = h;
+		}
+	protected:
+		double x, y;
+		double width, height;
+};
+
 struct Edge {
 	std::shared_ptr<IVertex> vertices[2];
 	
@@ -65,6 +95,11 @@ struct Edge {
 		vertices[1] = std::move(v2);
 	}
 }
+
+typedef struct DirectedEdge {
+	std::shared_ptr<IVertex> tail;
+	std::shared_ptr<IVertex> head;
+} Arc;
 
 class Graph {
 	protected:
@@ -77,6 +112,7 @@ class Graph {
 					return existing;
 				}
 			}
+
 			return nullptr;
 		}
 	public:
@@ -88,12 +124,13 @@ class Graph {
 				return existing;
 			}
 			vertices.push_back(v);
+
 			return v;
 		}
 		void addEdge(std::shared_ptr<IVertex> v1, std::shared_ptr<IVertex> v2) {
 			auto vertex1 = addVertex(v1);
 			auto vertex2 = addVertex(v2);
-			edges.emplace_bask(vertex1, vertex2);
+			edges.emplace_back(vertex1, vertex2);
 		}
 		virtual void printGraph() const {
 			for (const auto& edge : edges) {
@@ -106,6 +143,51 @@ class Graph {
 		
 		virtual std::shared_ptr<IVertex> createVertex() = 0;
 };
+
+class Digraph {
+	protected:
+		std::vector<std::shared_ptr<IVertex>> vertices;
+		std::vector<Arc> edges;
+		
+		std::shared_ptr<IVertex> findVertex(const IVertex& v) const {
+			for (const auto& existing : vertices) {
+				if (existing->equals(v)) {
+					return existing;
+				}
+			}
+
+			return nullptr;
+		}
+	public:
+		virtual ~Graph() = default;
+		
+		std::shared_ptr<IVertex> addVertex(std::shared_ptr<IVertex> v) {
+			auto existing = findVertex(*v);
+			if (existing) {
+				return existing;
+			}
+			vertices.push_back(v);
+
+			return v;
+		}
+		void addEdge(std::shared_ptr<IVertex> tail, std::shared_ptr<IVertex> head) {
+			Arc edge;
+			edge.tail = std::move(tail);
+			edge.head = std::move(head);
+			edges.push_back(std::move(edge));			
+		}
+		virtual void printGraph() const {
+			for (const auto& edge : edges) {
+				std::cout << edges.vertices.tail->toString()
+				          << " -- "
+				          << edges.vertices.head->toString()
+				          << "\n";
+			}
+		}
+		
+		virtual std::shared_ptr<IVertex> createVertex() = 0;
+};
+
 
 // Signal Flow Graphs
 
@@ -120,7 +202,7 @@ class Branch : public IVertex {
 
 };
 
-class SignalFlowGraph : public Graph {
+class SignalFlowGraph : public Digraph {
 
 };
 
@@ -142,11 +224,11 @@ class TakeoffPoint : public IVertex {
 
 };
 
-class BlockDiagram : public Graph {
+class BlockDiagram : public Digraph {
 
 };
 
-// DSP Signal FLow Graphs
+// DSP Signal Flow Graphs
 
 class Delay : public IVertex {
 
@@ -164,7 +246,7 @@ class BranchPoint : public IVertex {
 
 };
 
-class FilterStructureDiagram : public Graph{
+class FilterStructureDiagram : public Digraph {
 	public:
 		//std::vector<Delay> delays;
 		//std::vector<Adder> adders;
