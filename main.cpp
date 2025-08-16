@@ -8,10 +8,12 @@
 #include <imgui_impl_sdl3.h>
 #include <imgui_impl_sdlrenderer3.h>
 
+#include "application.hpp"
+
 // The block needs to be made a class
 // It will have graphical and symbolic elements which may need
 // to be made their own class or structs
-struct Block {
+struct SimpleBlock {
   int x, y;
   int width, height;
 };
@@ -19,7 +21,9 @@ struct Block {
 struct AppState {
 	SDL_Window* window = nullptr;
 	SDL_Renderer* renderer = nullptr;
-	std::vector<Block> blocks;
+	Application* application = nullptr;
+	
+	std::vector<SimpleBlock> blocks;
 	const int blockWidth = 100;
 	const int blockHeight = 66;
 };
@@ -28,12 +32,13 @@ extern "C" {
 // Runs at startup - initialization
 SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
 	auto* state = new AppState();
+	
 	*appstate = state;
 
-  state->window = SDL_CreateWindow(
-	  "Control Prototype",
-	  960, 720,
-	  SDL_WINDOW_RESIZABLE);
+	state->window = SDL_CreateWindow(
+		"Control Prototype",
+		960, 720,
+		SDL_WINDOW_RESIZABLE);
 	  
 	if (!state->window) {
 		std::cerr << "SDL_CreateWindow Error: " << SDL_GetError() << "\n";
@@ -45,6 +50,8 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
 		std::cerr << "SDL_CreateRenderer Error: " << SDL_GetError() << "\n";
 		return SDL_APP_FAILURE;
 	}
+	
+	state->application = new Application(state->window, state->renderer);
 	
 	// Setup Dear ImGui
 	IMGUI_CHECKVERSION();
@@ -63,7 +70,8 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event) {
 	
 	// Pass events to ImGui
 	ImGui_ImplSDL3_ProcessEvent(event);
-
+	
+	state->application->callback(event);
 	switch (event->type) {
 		case SDL_EVENT_QUIT:
 			return SDL_APP_SUCCESS;
@@ -124,6 +132,8 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
 	ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), state->renderer);
 
 	SDL_RenderPresent(state->renderer);
+	
+	state->application->loop();
 
 	SDL_Delay(16); // ~60 FPS
 
@@ -148,6 +158,7 @@ void SDL_AppQuit(void* appstate, SDL_AppResult result) {
 
 	SDL_Quit();
 
+	delete state->application;
 	delete state;
 }
 

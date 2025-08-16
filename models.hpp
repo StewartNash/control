@@ -30,13 +30,6 @@ class IVertex {
 		virtual std::string toString() const = 0;
 };
 
-class IShape {
-	public:
-		virtual ~Ishape() = default;
-		virtual void setPosition(double x, double y) = 0;
-		virtual void setSize(double width, double height) = 0;
-};	
-
 class Vertex : public IVertex {
 	protected:
 		std::string uuid;
@@ -71,22 +64,6 @@ class Vertex : public IVertex {
 		}			
 };
 
-class GraphicalVertex : public IVertex, public IShape {
-	public:
-		explicit GraphicalVertex() : x(0), y(0), width(0), height(0) {}
-		void setPosition(double x_, double y_) override {
-			x = x_;
-			y = y_;
-		}
-		void setSize(double w, double h) override {
-			width = w;
-			height = h;
-		}
-	protected:
-		double x, y;
-		double width, height;
-};
-
 struct Edge {
 	std::shared_ptr<IVertex> vertices[2];
 	
@@ -94,7 +71,7 @@ struct Edge {
 		vertices[0] = std::move(v1);
 		vertices[1] = std::move(v2);
 	}
-}
+};
 
 typedef struct DirectedEdge {
 	std::shared_ptr<IVertex> tail;
@@ -132,11 +109,11 @@ class Graph {
 			auto vertex2 = addVertex(v2);
 			edges.emplace_back(vertex1, vertex2);
 		}
-		virtual void printGraph() const {
+		virtual void draw() const {
 			for (const auto& edge : edges) {
-				std::cout << edges.vertices[0]->toString()
+				std::cout << edge.vertices[0]->toString()
 				          << " -- "
-				          << edges.vertices[1]->toString()
+				          << edge.vertices[1]->toString()
 				          << "\n";
 			}
 		}
@@ -159,7 +136,7 @@ class Digraph {
 			return nullptr;
 		}
 	public:
-		virtual ~Graph() = default;
+		virtual ~Digraph() = default;
 		
 		std::shared_ptr<IVertex> addVertex(std::shared_ptr<IVertex> v) {
 			auto existing = findVertex(*v);
@@ -176,11 +153,11 @@ class Digraph {
 			edge.head = std::move(head);
 			edges.push_back(std::move(edge));			
 		}
-		virtual void printGraph() const {
+		virtual void draw() const {
 			for (const auto& edge : edges) {
-				std::cout << edges.vertices.tail->toString()
+				std::cout << edge.tail->toString()
 				          << " -- "
-				          << edges.vertices.head->toString()
+				          << edge.head->toString()
 				          << "\n";
 			}
 		}
@@ -191,14 +168,14 @@ class Digraph {
 
 // Signal Flow Graphs
 
+class Branch : public IVertex {
+
+};
+
 class Node {
 	public:
 		std::vector<Branch> inputs;
 		std::vector<Branch> outputs;
-
-};
-
-class Branch : public IVertex {
 
 };
 
@@ -247,9 +224,5 @@ class BranchPoint : public IVertex {
 };
 
 class FilterStructureDiagram : public Digraph {
-	public:
-		//std::vector<Delay> delays;
-		//std::vector<Adder> adders;
-		//std::vector<Multiplier> multipliers;
-		//std::vector<BranchPoint> branches;
+
 };
