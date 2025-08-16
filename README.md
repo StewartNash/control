@@ -1,7 +1,11 @@
 # Control
-Signal processing and control application
+Control system and digital signal processing application
 
 ## Introduction
+
+This is an application made to visually build control systems and export them to Python, LaTeX and (secondarily) MATLAB. The control systems can be designed using either signal flow graphs or (functional) block diagrams. The application also has the capability to visually build digital signal processing filters through filter structure diagrams. The filters can then be exported in Python's SciPy, the custom "Signal" library -- available in repository on this site -- and (secondarily) MATLAB.
+
+The application also has a system for visually identifying and translating filter structure diagrams and block diagrams into its own custom format for import into the application. It includes a useful training set curating tool which will be separated into its own repository.
 
 ### Philosophy
 
@@ -43,5 +47,7 @@ cmake --build .
 - .blk files are XML
 - Research and implement Python bindings
 - Use artificial intelligence and image processing to recognize and import filter structure diagrams
+- Training data annotation tool
+- Neural network script
 
 ## Future Work

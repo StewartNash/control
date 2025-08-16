@@ -39,27 +39,26 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
 		"Control Prototype",
 		960, 720,
 		SDL_WINDOW_RESIZABLE);
-	  
 	if (!state->window) {
 		std::cerr << "SDL_CreateWindow Error: " << SDL_GetError() << "\n";
 		return SDL_APP_FAILURE;
 	}
-
 	state->renderer = SDL_CreateRenderer(state->window, nullptr);
 	if (!state->renderer) {
 		std::cerr << "SDL_CreateRenderer Error: " << SDL_GetError() << "\n";
 		return SDL_APP_FAILURE;
 	}
-	
 	state->application = new Application(state->window, state->renderer);
-	
+
+	/*
 	// Setup Dear ImGui
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
 	ImGui::StyleColorsDark();
-	
+
 	ImGui_ImplSDL3_InitForSDLRenderer(state->window, state->renderer);
 	ImGui_ImplSDLRenderer3_Init(state->renderer);
+	*/
 
 	return SDL_APP_CONTINUE;
 }
@@ -97,6 +96,7 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event) {
 SDL_AppResult SDL_AppIterate(void* appstate) {
 	auto* state = static_cast<AppState*>(appstate);
 	
+	/*
 	// Start ImGui frame
 	ImGui_ImplSDLRenderer3_NewFrame();
 	ImGui_ImplSDL3_NewFrame();
@@ -114,7 +114,9 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
 	  state->blocks.clear();
 	}
 	ImGui::End();
+	*/
 
+	/*
 	SDL_SetRenderDrawColor(state->renderer, 0, 0, 0, 255);
 	SDL_RenderClear(state->renderer);
 
@@ -132,7 +134,7 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
 	ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), state->renderer);
 
 	SDL_RenderPresent(state->renderer);
-	
+	*/
 	state->application->loop();
 
 	SDL_Delay(16); // ~60 FPS
@@ -143,22 +145,23 @@ SDL_AppResult SDL_AppIterate(void* appstate) {
 // Runs at shutdown
 void SDL_AppQuit(void* appstate, SDL_AppResult result) {
 	auto* state = static_cast<AppState*>(appstate);
-	
+
 	(void)result;
-	
+
+	/*
 	// Shutdown ImGui
 	ImGui_ImplSDLRenderer3_Shutdown();
 	ImGui_ImplSDL3_Shutdown();
 	ImGui::DestroyContext();
-	
-	if (state->renderer)
-		SDL_DestroyRenderer(state->renderer);
-	if (state->window)
-		SDL_DestroyWindow(state->window);
-
-	SDL_Quit();
-
+	*/
 	delete state->application;
+	if (state->renderer) {
+		SDL_DestroyRenderer(state->renderer);
+	}
+	if (state->window) {
+		SDL_DestroyWindow(state->window);
+	}
+	SDL_Quit();
 	delete state;
 }
 
