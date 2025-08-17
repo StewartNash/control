@@ -24,7 +24,12 @@ target_link_libraries(imgui PUBLIC SDL3::SDL3)
 set(OpenCV_DIR "${CMAKE_SOURCE_DIR}/external/opencv/build")
 find_package(OpenCV REQUIRED)
 
-add_executable(control main.cpp application.cpp)
+add_executable(control
+    main.cpp
+    application.cpp
+    mainapplication.cpp
+    editorapplication.cpp
+)
 target_include_directories(control PRIVATE
     ${CMAKE_SOURCE_DIR}/external/opencv/include
 )

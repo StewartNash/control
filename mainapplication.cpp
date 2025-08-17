@@ -1,27 +1,17 @@
-#include "application.hpp"
+#include "mainapplication.hpp"
 
-Application::~Application() {
-	// Shutdown ImGui
-	ImGui_ImplSDLRenderer3_Shutdown();
-	ImGui_ImplSDL3_Shutdown();
-	ImGui::DestroyContext();
-}
-
-void Application::callback(SDL_Event* event) {
-	// Pass events to ImGui
-	ImGui_ImplSDL3_ProcessEvent(event);
-}
-
-void Application::draw() {
+void MainApplication::draw() {
 	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
 	SDL_RenderClear(renderer);
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 128);
 
+        // Start ImGui frame
 	ImGui_ImplSDLRenderer3_NewFrame();
 	ImGui_ImplSDL3_NewFrame();
 	ImGui::NewFrame();
-
+	
 	drawMenu();
+
 	/*
 	for (const auto& blk : state->blocks) {
 		SDL_FRect rect = {
@@ -32,6 +22,7 @@ void Application::draw() {
 		SDL_RenderFillRect(state->renderer, &rect);
 	}
 	*/
+	
 	// Render ImGui
 	ImGui::Render();
 	ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), renderer);
@@ -39,7 +30,7 @@ void Application::draw() {
 	SDL_RenderPresent(renderer);
 }
 
-void Application::drawMenu() {
+void MainApplication::drawMenu() {
 	ImGui::Begin("Drawing Menu");
 	ImGui::Text("Application: Filter Structure Diagram");
 	ImGui::Button("Branch");
@@ -51,19 +42,5 @@ void Application::drawMenu() {
 	  //state->blocks.clear();
 	}
 	ImGui::End();
-}
-
-void Application::initialize() {
-	// Setup Dear ImGui
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImGui::StyleColorsDark();
-	
-	ImGui_ImplSDL3_InitForSDLRenderer(window, renderer);
-	ImGui_ImplSDLRenderer3_Init(renderer);
-}
-
-void Application::loop() {
-	draw();
 }
 
