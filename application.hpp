@@ -35,6 +35,7 @@ class Application {
 		void callback(SDL_Event* event);
 		void draw();
 		void drawMenu();
+		ImGuiContext* context;		
 
 	protected:
 		SDL_Window* window;

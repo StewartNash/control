@@ -1,6 +1,9 @@
 #include "application.hpp"
 
 Application::~Application() {
+	if (ImGui::GetCurrentContext() != context) {
+		ImGui::SetCurrentContext(context);
+	}
 	// Shutdown ImGui
 	ImGui_ImplSDLRenderer3_Shutdown();
 	ImGui_ImplSDL3_Shutdown();
@@ -8,6 +11,9 @@ Application::~Application() {
 }
 
 void Application::callback(SDL_Event* event) {
+	if (ImGui::GetCurrentContext() != context) {
+		ImGui::SetCurrentContext(context);
+	}
 	// Pass events to ImGui
 	ImGui_ImplSDL3_ProcessEvent(event);
 }
@@ -17,6 +23,9 @@ void Application::draw() {
 	SDL_RenderClear(renderer);
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 128);
 
+	if (ImGui::GetCurrentContext() != context) {
+		ImGui::SetCurrentContext(context);
+	}
 	ImGui_ImplSDLRenderer3_NewFrame();
 	ImGui_ImplSDL3_NewFrame();
 	ImGui::NewFrame();
@@ -61,6 +70,7 @@ void Application::initialize() {
 	
 	ImGui_ImplSDL3_InitForSDLRenderer(window, renderer);
 	ImGui_ImplSDLRenderer3_Init(renderer);
+	context = ImGui::GetCurrentContext();
 }
 
 void Application::loop() {
