@@ -22,7 +22,7 @@ void EditorApplication::draw() {
 		SDL_RenderFillRect(state->renderer, &rect);
 	}
 	*/
-
+	
 	// Render ImGui
 	ImGui::Render();
 	ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), renderer);
@@ -41,6 +41,21 @@ void EditorApplication::drawMenu() {
 	if (ImGui::Button("Clear")) {
 	  //state->blocks.clear();
 	}
+	if (texture) {
+		ImGui::Image((ImTextureID)texture, ImVec2((float)image.cols, (float)image.rows));
+	}
 	ImGui::End();
 }
 
+void EditorApplication::initialize() {
+	image = cv::imread("/home/stewart/Repositories/control/data/img531.png");
+	texture = matToTexture(image, renderer);
+	
+	// Setup Dear ImGui
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImGui::StyleColorsDark();
+	
+	ImGui_ImplSDL3_InitForSDLRenderer(window, renderer);
+	ImGui_ImplSDLRenderer3_Init(renderer);
+}
