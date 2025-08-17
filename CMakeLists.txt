@@ -3,8 +3,9 @@ project(Control)
 
 set(CMAKE_CXX_STANDARD 17)
 set(IMGUI_DIR ${CMAKE_SOURCE_DIR}/external/imgui)
-
+# SDL3
 add_subdirectory(external/SDL)
+# Dear ImGui
 add_library(imgui
     ${IMGUI_DIR}/imgui.cpp
     ${IMGUI_DIR}/imgui_draw.cpp
@@ -18,7 +19,17 @@ target_include_directories(imgui PUBLIC
     ${IMGUI_DIR}/backends
     ${CMAKE_SOURCE_DIR}/external/SDL/include
 )
-
 target_link_libraries(imgui PUBLIC SDL3::SDL3)
-add_executable(control main.cpp)
-target_link_libraries(control PRIVATE imgui)
+# OpenCV
+set(OpenCV_DIR "${CMAKE_SOURCE_DIR}/external/opencv/build")
+find_package(OpenCV REQUIRED)
+
+add_executable(control main.cpp application.cpp)
+target_include_directories(control PRIVATE
+    ${CMAKE_SOURCE_DIR}/external/opencv/include
+)
+target_link_libraries(control
+    PRIVATE
+        imgui
+        ${OpenCV_LIBS}
+)

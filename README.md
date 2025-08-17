@@ -51,3 +51,13 @@ cmake --build .
 - Neural network script
 
 ## Future Work
+
+## Notes
+```
+git submodule add https://github.com/opencv/opencv.git external/opencv
+git submodule update --init --recursive
+cd external/opencv
+mkdir build && cd build
+cmake ..
+make -j$(nproc)
+```

@@ -6,6 +6,8 @@
 #include <random>
 #include <sstream>
 #include <iomanip>
+#include <iostream>
+
 
 /*
 	In graph theory, a graph G=(V,E) is a set V=V(G) called vertices
