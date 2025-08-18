@@ -11,6 +11,7 @@
 #include "application.hpp"
 #include "mainapplication.hpp"
 #include "editorapplication.hpp"
+
 /*
 enum ApplicationType {
 	MAIN,
@@ -34,6 +35,9 @@ struct ApplicationState {
 };
 
 extern "C" {
+
+static inline SDL_WindowID EventWindowID(const SDL_Event& e);
+
 // Runs at startup - initialization
 SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
 	auto* state = new ApplicationState();
@@ -67,6 +71,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
 		std::cerr << "SDL_CreateRenderer Error: " << SDL_GetError() << "\n";
 		return SDL_APP_FAILURE;
 	}
+	state->editorApplication = new EditorApplication(state->editorWindow, state->editorRenderer);
 
 	return SDL_APP_CONTINUE;
 }
@@ -74,17 +79,23 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
 // Runs when a new event occurs - 'callback' or 'interrupt'
 SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event) {
 	auto* state = static_cast<ApplicationState*>(appstate);
-	
-	// Pass events to ImGui
-	//ImGui_ImplSDL3_ProcessEvent(event);
-	if (event->window.windowID == SDL_GetWindowID(state->mainWindow)) {
-		//ImGui::SetCurrentContext(state->mainApplication->context);
-		//ImGui_ImplSDL3_ProcessEvent(event);
-		state->mainApplication->callback(event);
-	} else if (event->window.windowID == SDL_GetWindowID(state->editorWindow)) {
-		//ImGui::SetCurrentContext(state->editorApplication->context);
-		//ImGui_ImplSDL3_ProcessEvent(event);
-		state->editorApplication->callback(event);
+	const SDL_WindowID windowID = EventWindowID(*event);
+
+	if (windowID) {
+		if (state->mainWindow && windowID == SDL_GetWindowID(state->mainWindow)) {
+			state->mainApplication->callback(event);
+		} else if (state->editorWindow && event->window.windowID == SDL_GetWindowID(state->editorWindow)) {
+			state->editorApplication->callback(event);
+		}
+	} else {
+		/*
+		if (state->mainApplication) {
+			state->mainApplication->callback(event);
+		}
+		if (state->editorApplication) {
+			state->editorApplication->callback(event);
+		}
+		*/
 	}
 	/*	
 	switch (event->type) {
@@ -143,6 +154,41 @@ void SDL_AppQuit(void* appstate, SDL_AppResult result) {
 	}
 	SDL_Quit();
 	delete state;
+}
+
+static inline SDL_WindowID EventWindowID(const SDL_Event& e) {
+	switch (e.type) {
+		case SDL_EVENT_WINDOW_SHOWN:
+		case SDL_EVENT_WINDOW_HIDDEN:
+		case SDL_EVENT_WINDOW_EXPOSED:
+		case SDL_EVENT_WINDOW_MINIMIZED:
+		case SDL_EVENT_WINDOW_MAXIMIZED:
+		case SDL_EVENT_WINDOW_RESTORED:
+		case SDL_EVENT_WINDOW_MOUSE_ENTER:
+		case SDL_EVENT_WINDOW_MOUSE_LEAVE:
+		case SDL_EVENT_WINDOW_FOCUS_GAINED:
+		case SDL_EVENT_WINDOW_FOCUS_LOST:
+		case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+			return e.window.windowID;
+		case SDL_EVENT_MOUSE_MOTION:
+			return e.motion.windowID;
+		case SDL_EVENT_MOUSE_BUTTON_DOWN:
+		case SDL_EVENT_MOUSE_BUTTON_UP:
+			return e.button.windowID;
+		case SDL_EVENT_MOUSE_WHEEL:
+			return e.wheel.windowID;
+		case SDL_EVENT_KEY_DOWN:
+		case SDL_EVENT_KEY_UP:
+			return e.key.windowID;
+		case SDL_EVENT_TEXT_INPUT:
+		case SDL_EVENT_TEXT_EDITING:
+			return e.text.windowID;
+		case SDL_EVENT_RENDER_TARGETS_RESET:
+		case SDL_EVENT_RENDER_DEVICE_RESET:
+			return e.render.windowID;
+		default:
+			return 0; // non-window-specific event
+	}
 }
 
 } // extern "C"

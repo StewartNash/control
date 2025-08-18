@@ -11,9 +11,19 @@ Application::~Application() {
 }
 
 void Application::callback(SDL_Event* event) {
+	if (!event) {
+		return;
+	}
+	if (!context) {
+		return;
+	}
+	if (!window) {
+		return;
+	}
 	if (ImGui::GetCurrentContext() != context) {
 		ImGui::SetCurrentContext(context);
 	}
+	IM_ASSERT(ImGui::GetCurrentContext() == context);
 	// Pass events to ImGui
 	ImGui_ImplSDL3_ProcessEvent(event);
 }
@@ -64,13 +74,13 @@ void Application::drawMenu() {
 
 void Application::initialize() {
 	// Setup Dear ImGui
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
+	//IMGUI_CHECKVERSION();
+	context = ImGui::CreateContext();
 	ImGui::StyleColorsDark();
 	
 	ImGui_ImplSDL3_InitForSDLRenderer(window, renderer);
 	ImGui_ImplSDLRenderer3_Init(renderer);
-	context = ImGui::GetCurrentContext();
+	//context = ImGui::GetCurrentContext();
 }
 
 void Application::loop() {
