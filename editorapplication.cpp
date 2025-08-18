@@ -1,39 +1,53 @@
 #include "editorapplication.hpp"
 
-// Convert OpenCV Mat to SDL_Texture
 SDL_Texture* matToTexture(const cv::Mat& mat, SDL_Renderer* renderer) {
-	// Convert to RGBA if needed
-	cv::Mat converted;
-	if (mat.channels() == 3) {
-		cv::cvtColor(mat, converted, cv::COLOR_BGR2RGBA);
-	} else if (mat.channels() == 1) {
-		cv::cvtColor(mat, converted, cv::COLOR_GRAY2RGBA);
-	} else {
-		converted = mat; // Already RGBA
-	}
-	// Create SDL surface from raw pixels
-	SDL_Surface* surface = SDL_CreateSurfaceFrom(
-		converted.cols,
-		converted.rows,
-		SDL_PIXELFORMAT_RGBA32,
-		(void*)converted.data,
-		converted.step
-	);
-	if (!surface) {
-		SDL_Log("Failed to create SDL surface: %s", SDL_GetError());
-		return nullptr;
-	}
-	// Create texture from surface
-	SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
-	SDL_DestroySurface(surface);
-	
-	return texture;
+    if (mat.empty()) {
+        SDL_Log("matToTexture: input Mat is empty!");
+        return nullptr;
+    }
+
+    cv::Mat converted;
+
+    // Convert to RGBA
+    if (mat.channels() == 3) {
+        cv::cvtColor(mat, converted, cv::COLOR_BGR2RGBA);
+    } else if (mat.channels() == 1) {
+        cv::cvtColor(mat, converted, cv::COLOR_GRAY2RGBA);
+    } else if (mat.channels() == 4) {
+        converted = mat.clone();
+    } else {
+        SDL_Log("matToTexture: Unsupported number of channels: %d", mat.channels());
+        return nullptr;
+    }
+
+    // Create a STREAMING texture so we can update it
+    SDL_Texture* texture = SDL_CreateTexture(
+        renderer,
+        SDL_PIXELFORMAT_RGBA32,
+        SDL_TEXTUREACCESS_STREAMING,
+        converted.cols,
+        converted.rows
+    );
+
+    if (!texture) {
+        SDL_Log("matToTexture: SDL_CreateTexture failed: %s", SDL_GetError());
+        return nullptr;
+    }
+
+    // Update the texture with pixel data
+    if (SDL_UpdateTexture(texture, nullptr, converted.data, converted.step) != 0) {
+        SDL_Log("matToTexture: SDL_UpdateTexture failed: %s", SDL_GetError());
+        SDL_DestroyTexture(texture);
+        return nullptr;
+    }
+
+    SDL_Log("matToTexture: texture created successfully (%dx%d)", converted.cols, converted.rows);
+    return texture;
 }
 
+
 void EditorApplication::draw() {
-	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
-	SDL_RenderClear(renderer);
-	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 128);
+	//SDL_SetRenderDrawColor(renderer, 255, 255, 255, 128);
 
 	if (ImGui::GetCurrentContext() != context) {
 		ImGui::SetCurrentContext(context);
@@ -54,7 +68,13 @@ void EditorApplication::draw() {
 	}
 	*/
 	// Render ImGui
-	ImGui::Render();
+
+	
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+	SDL_RenderClear(renderer);
+	SDL_RenderTexture(renderer, texture, nullptr, nullptr);
+
+	ImGui::Render();	
 	ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), renderer);
 
 	SDL_RenderPresent(renderer);
@@ -71,23 +91,52 @@ void EditorApplication::drawMenu() {
 	if (ImGui::Button("Clear")) {
 	  //state->blocks.clear();
 	}
-	if (texture) {
-		ImGui::Image((ImTextureID)texture, ImVec2((float)image.cols, (float)image.rows));
-	}
+	ImGui::Text("Image cols=%d rows=%d", image.cols, image.rows);
+        if (imguiTexture) {
+            ImVec2 avail = ImGui::GetContentRegionAvail();
+            // optionally scale to fit: keep aspect ratio
+            float aspect = (float)image.cols / (float)image.rows;
+            float w = std::min((float)image.cols, avail.x);
+            float h = w / aspect;
+            if (h > avail.y) { h = avail.y; w = h * aspect; }
+            ImGui::Image(imguiTexture, ImVec2(w, h));
+        } else {
+            ImGui::Text("No texture!");
+        }
 	ImGui::End();
 }
 
 void EditorApplication::initialize() {
-	image = cv::imread("/home/stewart/Repositories/control/data/img531.png");
-	texture = matToTexture(image, renderer);
-	
-	// Setup Dear ImGui
-	//IMGUI_CHECKVERSION();
-	context = ImGui::CreateContext();
-	ImGui::SetCurrentContext(context);
-	
-	ImGui::StyleColorsDark();
-	
-	ImGui_ImplSDL3_InitForSDLRenderer(window, renderer);
-	ImGui_ImplSDLRenderer3_Init(renderer);
+    // 1. ImGui context and backend
+    context = ImGui::CreateContext();
+    ImGui::SetCurrentContext(context);
+    ImGui::StyleColorsDark();
+    ImGui_ImplSDL3_InitForSDLRenderer(window, renderer);
+    ImGui_ImplSDLRenderer3_Init(renderer);
+
+    // 2. Load image
+    image = cv::imread("/home/stewart/Repositories/control/data/img531.png", cv::IMREAD_UNCHANGED);
+    if (image.empty()) {
+        SDL_Log("EditorApplication::initialize: failed to load image");
+        return;
+    }
+
+    SDL_Log("EditorApplication::initialize: image size %d x %d", image.cols, image.rows);
+
+    // 3. Convert to SDL_Texture
+    if (texture) {
+        SDL_DestroyTexture(texture);
+        texture = nullptr;
+    }
+    texture = matToTexture(image, renderer);
+    if (!texture) {
+        SDL_Log("EditorApplication::initialize: matToTexture failed");
+        return;
+    }
+
+    SDL_Log("EditorApplication::initialize: texture created successfully");
+
+    // 4. Assign to ImGui
+    imguiTexture = (ImTextureID)(intptr_t)texture;
 }
+

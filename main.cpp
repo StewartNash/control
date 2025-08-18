@@ -57,6 +57,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
 		return SDL_APP_FAILURE;
 	}
 	state->mainApplication = new MainApplication(state->mainWindow, state->mainRenderer);
+	state->mainApplication->initialize();
 
 	state->editorWindow = SDL_CreateWindow(
 		"Editor Prototype",
@@ -72,6 +73,7 @@ SDL_AppResult SDL_AppInit(void** appstate, int argc, char* argv[]) {
 		return SDL_APP_FAILURE;
 	}
 	state->editorApplication = new EditorApplication(state->editorWindow, state->editorRenderer);
+	state->editorApplication->initialize();
 
 	return SDL_APP_CONTINUE;
 }

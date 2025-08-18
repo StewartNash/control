@@ -9,11 +9,12 @@ class EditorApplication : public Application {
 		EditorApplication(SDL_Window* w, SDL_Renderer* r) : Application(w, r) { }
 		//void loop();
 		//void callback(SDL_Event* event);
-		void draw();
-		void drawMenu();
+		void draw() override;
+		void drawMenu() override;
+		void initialize() override;
 	protected:
-		void initialize();
 		cv::Mat image;
 		SDL_Texture* texture;
+		ImTextureID imguiTexture = 0;
 };
 

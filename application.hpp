@@ -30,16 +30,15 @@ class SDLRenderer : public IRenderer {
 class Application {
 	public:
 		Application(SDL_Window* w, SDL_Renderer* r) : window(w), renderer(r) { initialize(); }
-		~Application();
-		void loop();
+		virtual ~Application();
+		virtual void loop();
 		void callback(SDL_Event* event);
-		void draw();
-		void drawMenu();
+		virtual void draw();
+		virtual void drawMenu();
 		ImGuiContext* context;		
-
+		virtual void initialize();
 	protected:
 		SDL_Window* window;
 		SDL_Renderer* renderer;
-		void initialize();
 };
 
