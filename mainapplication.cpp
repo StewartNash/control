@@ -5,6 +5,9 @@ void MainApplication::draw() {
 	SDL_RenderClear(renderer);
 	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 128);
 
+	if (ImGui::GetCurrentContext() != context) {
+		ImGui::SetCurrentContext(context);
+	}
         // Start ImGui frame
 	ImGui_ImplSDLRenderer3_NewFrame();
 	ImGui_ImplSDL3_NewFrame();

@@ -84,6 +84,8 @@ void EditorApplication::initialize() {
 	// Setup Dear ImGui
 	//IMGUI_CHECKVERSION();
 	context = ImGui::CreateContext();
+	ImGui::SetCurrentContext(context);
+	
 	ImGui::StyleColorsDark();
 	
 	ImGui_ImplSDL3_InitForSDLRenderer(window, renderer);

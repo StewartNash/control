@@ -76,11 +76,12 @@ void Application::initialize() {
 	// Setup Dear ImGui
 	//IMGUI_CHECKVERSION();
 	context = ImGui::CreateContext();
+	ImGui::SetCurrentContext(context);
+	
 	ImGui::StyleColorsDark();
 	
 	ImGui_ImplSDL3_InitForSDLRenderer(window, renderer);
 	ImGui_ImplSDLRenderer3_Init(renderer);
-	//context = ImGui::GetCurrentContext();
 }
 
 void Application::loop() {

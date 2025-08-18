@@ -97,11 +97,11 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event) {
 		}
 		*/
 	}
-	/*	
 	switch (event->type) {
 		case SDL_EVENT_QUIT:
+		case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
 			return SDL_APP_SUCCESS;
-
+		/*
 		case SDL_EVENT_MOUSE_BUTTON_DOWN: {
 			// Only add block if ImGui has not captured click
 			if (!ImGui::GetIO().WantCaptureMouse) {
@@ -111,11 +111,11 @@ SDL_AppResult SDL_AppEvent(void* appstate, SDL_Event* event) {
 			}
 			break;
 		}
-
+		*/
 		default:
 			break;
 	}
-	*/
+
 	return SDL_APP_CONTINUE;
 }
 
