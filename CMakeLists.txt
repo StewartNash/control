@@ -37,4 +37,5 @@ target_link_libraries(control
     PRIVATE
         imgui
         ${OpenCV_LIBS}
+        SDL3::SDL3
 )
