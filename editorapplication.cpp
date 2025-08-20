@@ -48,7 +48,6 @@ SDL_Texture* matToTexture(const cv::Mat& mat, SDL_Renderer* renderer) {
 
 void EditorApplication::draw() {
 	//SDL_SetRenderDrawColor(renderer, 255, 255, 255, 128);
-
 	if (ImGui::GetCurrentContext() != context) {
 		ImGui::SetCurrentContext(context);
 	}
@@ -81,29 +80,29 @@ void EditorApplication::draw() {
 }
 
 void EditorApplication::drawMenu() {
-	ImGui::Begin("Drawing Menu");
-	ImGui::Text("Application: Filter Structure Diagram");
-	ImGui::Button("Branch");
-	ImGui::Button("Delay");
-	ImGui::Button("Multiplier");
-	ImGui::Button("Sum");
-	ImGui::Button("Node");
-	if (ImGui::Button("Clear")) {
-	  //state->blocks.clear();
-	}
-	ImGui::Text("Image cols=%d rows=%d", image.cols, image.rows);
-        if (imguiTexture) {
-            ImVec2 avail = ImGui::GetContentRegionAvail();
-            // optionally scale to fit: keep aspect ratio
-            float aspect = (float)image.cols / (float)image.rows;
-            float w = std::min((float)image.cols, avail.x);
-            float h = w / aspect;
-            if (h > avail.y) { h = avail.y; w = h * aspect; }
-            ImGui::Image(imguiTexture, ImVec2(w, h));
-        } else {
-            ImGui::Text("No texture!");
-        }
-	ImGui::End();
+    ImGui::Begin("Drawing Menu");
+    ImGui::Text("Application: Filter Structure Diagram");
+    ImGui::Button("Branch");
+    ImGui::Button("Delay");
+    ImGui::Button("Multiplier");
+    ImGui::Button("Sum");
+    ImGui::Button("Node");
+    if (ImGui::Button("Clear")) {
+      //state->blocks.clear();
+    }
+    ImGui::Text("Image cols=%d rows=%d", image.cols, image.rows);
+          if (imguiTexture) {
+              ImVec2 avail = ImGui::GetContentRegionAvail();
+              // optionally scale to fit: keep aspect ratio
+              float aspect = (float)image.cols / (float)image.rows;
+              float w = std::min((float)image.cols, avail.x);
+              float h = w / aspect;
+              if (h > avail.y) { h = avail.y; w = h * aspect; }
+              ImGui::Image(imguiTexture, ImVec2(w, h));
+          } else {
+              ImGui::Text("No texture!");
+          }
+    ImGui::End();
 }
 
 void EditorApplication::initialize() {
@@ -138,5 +137,113 @@ void EditorApplication::initialize() {
 
     // 4. Assign to ImGui
     imguiTexture = (ImTextureID)(intptr_t)texture;
+}
+
+////////////////////////////////
+// AlternateEditorApplication //
+////////////////////////////////
+
+AlternateEditorApplication::~AlternateEditorApplication() {
+    SDL_DestroyTexture(texture);
+}
+
+void AlternateEditorApplication::callback(SDL_Event* event) {
+
+}
+
+void AlternateEditorApplication::draw() {
+	/*
+	//SDL_SetRenderDrawColor(renderer, 255, 255, 255, 128);
+	if (ImGui::GetCurrentContext() != context) {
+		ImGui::SetCurrentContext(context);
+	}
+	ImGui_ImplSDLRenderer3_NewFrame();
+	ImGui_ImplSDL3_NewFrame();
+	ImGui::NewFrame();
+
+	drawMenu();
+	//
+	//for (const auto& blk : state->blocks) {
+	//	SDL_FRect rect = {
+	//		static_cast<float>(blk.x),
+	//		static_cast<float>(blk.y),
+	//		static_cast<float>(blk.width),
+	//		static_cast<float>(blk.height)};
+	//	SDL_RenderFillRect(state->renderer, &rect);
+	//}
+	//
+	// Render ImGui
+
+	
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+	SDL_RenderClear(renderer);
+	SDL_RenderTexture(renderer, texture, nullptr, nullptr);
+
+	ImGui::Render();	
+	ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), renderer);
+
+	SDL_RenderPresent(renderer);
+	*/
+}
+
+void AlternateEditorApplication::drawMenu() {
+    /*
+    ImGui::Begin("Drawing Menu");
+    ImGui::Text("Application: Filter Structure Diagram");
+    ImGui::Button("Branch");
+    ImGui::Button("Delay");
+    ImGui::Button("Multiplier");
+    ImGui::Button("Sum");
+    ImGui::Button("Node");
+    if (ImGui::Button("Clear")) {
+      //state->blocks.clear();
+    }
+    ImGui::Text("Image cols=%d rows=%d", image.cols, image.rows);
+          if (imguiTexture) {
+              ImVec2 avail = ImGui::GetContentRegionAvail();
+              // optionally scale to fit: keep aspect ratio
+              float aspect = (float)image.cols / (float)image.rows;
+              float w = std::min((float)image.cols, avail.x);
+              float h = w / aspect;
+              if (h > avail.y) { h = avail.y; w = h * aspect; }
+              ImGui::Image(imguiTexture, ImVec2(w, h));
+          } else {
+              ImGui::Text("No texture!");
+          }
+    ImGui::End();
+    */
+}
+
+SDL_AppResult AlternateEditorApplication::initialize() {
+    image = cv::imread("../data/img531.png");
+    if (image.empty()) {
+        SDL_Log("Failed to load image with OpenCV");
+        return SDL_APP_FAILURE;
+    }
+    cv::cvtColor(image, image, cv::COLOR_BGR2RGB);
+    texture = SDL_CreateTexture(
+        renderer,
+        SDL_PIXELFORMAT_RGB24,
+        SDL_TEXTUREACCESS_STATIC,
+        image.cols,
+        image.rows
+    );
+    if (!texture) {
+        return SDL_APP_FAILURE;
+    }
+    SDL_UpdateTexture(texture, nullptr, image.data, image.step);
+
+    return SDL_APP_CONTINUE;
+}
+
+SDL_AppResult AlternateEditorApplication::loop() {
+    SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+    SDL_RenderClear(renderer);
+    if (texture) {
+        SDL_RenderTexture(renderer, texture, nullptr, nullptr);
+    }
+    SDL_RenderPresent(renderer);
+
+    return SDL_APP_CONTINUE;
 }
 

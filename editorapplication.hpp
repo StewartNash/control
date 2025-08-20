@@ -18,3 +18,20 @@ class EditorApplication : public Application {
 		ImTextureID imguiTexture = 0;
 };
 
+class AlternateEditorApplication {
+	public:
+		AlternateEditorApplication(SDL_Window* w, SDL_Renderer* r) : window(w), renderer(r) { }
+		~AlternateEditorApplication();
+		SDL_AppResult loop();
+		void callback(SDL_Event* event);
+		void draw();
+		void drawMenu();
+		SDL_AppResult initialize();
+	protected:
+		cv::Mat image;
+		SDL_Texture* texture;
+		ImTextureID imguiTexture = 0;
+		SDL_Window* window;
+		SDL_Renderer* renderer;		
+};
+
