@@ -145,10 +145,37 @@ void EditorApplication::initialize() {
 
 AlternateEditorApplication::~AlternateEditorApplication() {
     SDL_DestroyTexture(texture);
+    if (renderer) {
+        SDL_DestroyRenderer(renderer);
+        renderer = nullptr;
+    }
+    if (window) {
+        SDL_DestroyWindow(window);
+        window = nullptr;
+    }    
 }
 
-void AlternateEditorApplication::callback(SDL_Event* event) {
-
+SDL_AppResult AlternateEditorApplication::callback(SDL_Event* event) {
+    switch (event->type) {
+	    case SDL_EVENT_QUIT:
+	    case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
+		    return SDL_APP_SUCCESS;
+	    /*
+	    case SDL_EVENT_MOUSE_BUTTON_DOWN: {
+		    // Only add block if ImGui has not captured click
+		    if (!ImGui::GetIO().WantCaptureMouse) {
+			    //int x = event->button.x - state->blockWidth / 2;
+			    //int y = event->button.y - state->blockHeight / 2;
+			    //state->blocks.push_back({x, y, state->blockWidth, state->blockHeight});
+		    }
+		    break;
+	    }
+	    */
+	    default:
+		    break;
+    }
+    
+    return SDL_APP_CONTINUE;
 }
 
 void AlternateEditorApplication::draw() {
@@ -214,7 +241,23 @@ void AlternateEditorApplication::drawMenu() {
     */
 }
 
+SDL_WindowID AlternateEditorApplication::getWindowID() {
+    return SDL_GetWindowID(window);
+}
+
 SDL_AppResult AlternateEditorApplication::initialize() {
+    if (!window) {
+        window = SDL_CreateWindow("Image Editor", DEFAULT_WIDTH, DEFAULT_HEIGHT, SDL_WINDOW_RESIZABLE);
+        if (!window) {
+            return SDL_APP_FAILURE;
+        }
+    }
+    if (!renderer) {
+        renderer = SDL_CreateRenderer(window, nullptr);
+        if (!renderer) {
+            return SDL_APP_FAILURE;
+        }
+    }
     image = cv::imread("../data/img531.png");
     if (image.empty()) {
         SDL_Log("Failed to load image with OpenCV");
