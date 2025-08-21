@@ -42,3 +42,25 @@ class Application {
 		SDL_Renderer* renderer;
 };
 
+class AlternateApplication {
+	public:
+		AlternateApplication() : AlternateApplication(nullptr, nullptr) { }
+		AlternateApplication(SDL_Window* w, SDL_Renderer* r) : window(w), renderer(r) { }
+		virtual ~AlternateApplication();
+		virtual SDL_AppResult loop();
+		virtual SDL_AppResult callback(SDL_Event* event);
+		virtual void draw();
+		virtual void drawMenu();
+		virtual SDL_AppResult initialize();
+		SDL_WindowID getWindowID();
+	protected:
+		//cv::Mat image;
+		//SDL_Texture* texture;
+		//ImTextureID imguiTexture = 0;
+		SDL_Window* window;
+		SDL_Renderer* renderer;
+		const int DEFAULT_WIDTH = 960;
+		const int DEFAULT_HEIGHT = 720;
+};
+
+

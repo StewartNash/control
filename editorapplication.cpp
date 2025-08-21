@@ -144,7 +144,10 @@ void EditorApplication::initialize() {
 ////////////////////////////////
 
 AlternateEditorApplication::~AlternateEditorApplication() {
-    SDL_DestroyTexture(texture);
+    if (texture) {
+        SDL_DestroyTexture(texture);
+        texture = nullptr;
+    }
     if (renderer) {
         SDL_DestroyRenderer(renderer);
         renderer = nullptr;
