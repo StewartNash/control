@@ -155,7 +155,7 @@ AlternateEditorApplication::~AlternateEditorApplication() {
     if (window) {
         SDL_DestroyWindow(window);
         window = nullptr;
-    }    
+    }
 }
 
 SDL_AppResult AlternateEditorApplication::callback(SDL_Event* event) {
@@ -244,9 +244,11 @@ void AlternateEditorApplication::drawMenu() {
     */
 }
 
+/*
 SDL_WindowID AlternateEditorApplication::getWindowID() {
     return SDL_GetWindowID(window);
 }
+*/
 
 SDL_AppResult AlternateEditorApplication::initialize() {
     if (!window) {
