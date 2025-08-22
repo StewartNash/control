@@ -35,7 +35,7 @@ class Application {
 		void callback(SDL_Event* event);
 		virtual void draw();
 		virtual void drawMenu();
-		ImGuiContext* context;		
+		ImGuiContext* context;	
 		virtual void initialize();
 	protected:
 		SDL_Window* window;
