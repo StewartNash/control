@@ -1,55 +1,99 @@
-#include "editorapplication.hpp"
+#include "application.hpp"
 
-SDL_Texture* matToTexture(const cv::Mat& mat, SDL_Renderer* renderer) {
-    if (mat.empty()) {
-        SDL_Log("matToTexture: input Mat is empty!");
-        return nullptr;
-    }
-
-    cv::Mat converted;
-
-    // Convert to RGBA
-    if (mat.channels() == 3) {
-        cv::cvtColor(mat, converted, cv::COLOR_BGR2RGBA);
-    } else if (mat.channels() == 1) {
-        cv::cvtColor(mat, converted, cv::COLOR_GRAY2RGBA);
-    } else if (mat.channels() == 4) {
-        converted = mat.clone();
-    } else {
-        SDL_Log("matToTexture: Unsupported number of channels: %d", mat.channels());
-        return nullptr;
-    }
-
-    // Create a STREAMING texture so we can update it
-    SDL_Texture* texture = SDL_CreateTexture(
-        renderer,
-        SDL_PIXELFORMAT_RGBA32,
-        SDL_TEXTUREACCESS_STREAMING,
-        converted.cols,
-        converted.rows
-    );
-
-    if (!texture) {
-        SDL_Log("matToTexture: SDL_CreateTexture failed: %s", SDL_GetError());
-        return nullptr;
-    }
-
-    // Update the texture with pixel data
-    if (SDL_UpdateTexture(texture, nullptr, converted.data, converted.step) != 0) {
-        SDL_Log("matToTexture: SDL_UpdateTexture failed: %s", SDL_GetError());
-        SDL_DestroyTexture(texture);
-        return nullptr;
-    }
-
-    SDL_Log("matToTexture: texture created successfully (%dx%d)", converted.cols, converted.rows);
-    return texture;
+Application::~Application() {
+	if (ImGui::GetCurrentContext() != context) {
+		ImGui::SetCurrentContext(context);
+	}
+	// Shutdown ImGui
+	ImGui_ImplSDLRenderer3_Shutdown();
+	ImGui_ImplSDL3_Shutdown();
+	ImGui::DestroyContext();
 }
 
-EditorApplication::~EditorApplication() {
-    if (texture) {
-        SDL_DestroyTexture(texture);
-        texture = nullptr;
-    }
+void Application::callback(SDL_Event* event) {
+	if (!event) {
+		return;
+	}
+	if (!context) {
+		return;
+	}
+	if (!window) {
+		return;
+	}
+	if (ImGui::GetCurrentContext() != context) {
+		ImGui::SetCurrentContext(context);
+	}
+	IM_ASSERT(ImGui::GetCurrentContext() == context);
+	// Pass events to ImGui
+	ImGui_ImplSDL3_ProcessEvent(event);
+}
+
+void Application::draw() {
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+	SDL_RenderClear(renderer);
+	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 128);
+
+	if (ImGui::GetCurrentContext() != context) {
+		ImGui::SetCurrentContext(context);
+	}
+	ImGui_ImplSDLRenderer3_NewFrame();
+	ImGui_ImplSDL3_NewFrame();
+	ImGui::NewFrame();
+
+	drawMenu();
+	/*
+	for (const auto& blk : state->blocks) {
+		SDL_FRect rect = {
+			static_cast<float>(blk.x),
+			static_cast<float>(blk.y),
+			static_cast<float>(blk.width),
+			static_cast<float>(blk.height)};
+		SDL_RenderFillRect(state->renderer, &rect);
+	}
+	*/
+	// Render ImGui
+	ImGui::Render();
+	ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), renderer);
+
+	SDL_RenderPresent(renderer);
+}
+
+void Application::drawMenu() {
+	ImGui::Begin("Drawing Menu");
+	ImGui::Text("Application: Filter Structure Diagram");
+	ImGui::Button("Branch");
+	ImGui::Button("Delay");
+	ImGui::Button("Multiplier");
+	ImGui::Button("Sum");
+	ImGui::Button("Node");
+	if (ImGui::Button("Clear")) {
+	  //state->blocks.clear();
+	}
+	ImGui::End();
+}
+
+void Application::initialize() {
+	// Setup Dear ImGui
+	//IMGUI_CHECKVERSION();
+	context = ImGui::CreateContext();
+	ImGui::SetCurrentContext(context);
+	
+	ImGui::StyleColorsDark();
+	
+	ImGui_ImplSDL3_InitForSDLRenderer(window, renderer);
+	ImGui_ImplSDLRenderer3_Init(renderer);
+}
+
+void Application::loop() {
+	draw();
+}
+
+//////////////////////////
+// AlternateApplication //
+//////////////////////////
+
+AlternateApplication::~AlternateApplication() {
+    //SDL_DestroyTexture(texture);
     if (renderer) {
         SDL_DestroyRenderer(renderer);
         renderer = nullptr;
@@ -57,10 +101,10 @@ EditorApplication::~EditorApplication() {
     if (window) {
         SDL_DestroyWindow(window);
         window = nullptr;
-    }
+    }    
 }
 
-SDL_AppResult EditorApplication::callback(SDL_Event* event) {
+SDL_AppResult AlternateApplication::callback(SDL_Event* event) {
     switch (event->type) {
 	    case SDL_EVENT_QUIT:
 	    case SDL_EVENT_WINDOW_CLOSE_REQUESTED:
@@ -83,7 +127,7 @@ SDL_AppResult EditorApplication::callback(SDL_Event* event) {
     return SDL_APP_CONTINUE;
 }
 
-void EditorApplication::draw() {
+void AlternateApplication::draw() {
 	/*
 	//SDL_SetRenderDrawColor(renderer, 255, 255, 255, 128);
 	if (ImGui::GetCurrentContext() != context) {
@@ -118,7 +162,7 @@ void EditorApplication::draw() {
 	*/
 }
 
-void EditorApplication::drawMenu() {
+void AlternateApplication::drawMenu() {
     /*
     ImGui::Begin("Drawing Menu");
     ImGui::Text("Application: Filter Structure Diagram");
@@ -146,10 +190,13 @@ void EditorApplication::drawMenu() {
     */
 }
 
+SDL_WindowID AlternateApplication::getWindowID() {
+    return SDL_GetWindowID(window);
+}
 
-SDL_AppResult EditorApplication::initialize() {
+SDL_AppResult AlternateApplication::initialize() {
     if (!window) {
-        window = SDL_CreateWindow("Image Editor", DEFAULT_WIDTH, DEFAULT_HEIGHT, SDL_WINDOW_RESIZABLE);
+        window = SDL_CreateWindow("Control Application", DEFAULT_WIDTH, DEFAULT_HEIGHT, SDL_WINDOW_RESIZABLE);
         if (!window) {
             return SDL_APP_FAILURE;
         }
@@ -160,33 +207,18 @@ SDL_AppResult EditorApplication::initialize() {
             return SDL_APP_FAILURE;
         }
     }
-    image = cv::imread("../data/img531.png");
-    if (image.empty()) {
-        SDL_Log("Failed to load image with OpenCV");
-        return SDL_APP_FAILURE;
-    }
-    cv::cvtColor(image, image, cv::COLOR_BGR2RGB);
-    texture = SDL_CreateTexture(
-        renderer,
-        SDL_PIXELFORMAT_RGB24,
-        SDL_TEXTUREACCESS_STATIC,
-        image.cols,
-        image.rows
-    );
-    if (!texture) {
-        return SDL_APP_FAILURE;
-    }
-    SDL_UpdateTexture(texture, nullptr, image.data, image.step);
 
     return SDL_APP_CONTINUE;
 }
 
-SDL_AppResult EditorApplication::loop() {
+SDL_AppResult AlternateApplication::loop() {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
+    /*
     if (texture) {
         SDL_RenderTexture(renderer, texture, nullptr, nullptr);
     }
+    */
     SDL_RenderPresent(renderer);
 
     return SDL_APP_CONTINUE;

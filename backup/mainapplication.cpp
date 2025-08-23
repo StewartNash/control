@@ -1,0 +1,61 @@
+#include "mainapplication.hpp"
+
+void MainApplication::draw() {
+	SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
+	SDL_RenderClear(renderer);
+	SDL_SetRenderDrawColor(renderer, 255, 255, 255, 128);
+
+	if (ImGui::GetCurrentContext() != context) {
+		ImGui::SetCurrentContext(context);
+	}
+        // Start ImGui frame
+	ImGui_ImplSDLRenderer3_NewFrame();
+	ImGui_ImplSDL3_NewFrame();
+	ImGui::NewFrame();
+	
+	drawMenu();
+
+	/*
+	for (const auto& blk : state->blocks) {
+		SDL_FRect rect = {
+			static_cast<float>(blk.x),
+			static_cast<float>(blk.y),
+			static_cast<float>(blk.width),
+			static_cast<float>(blk.height)};
+		SDL_RenderFillRect(state->renderer, &rect);
+	}
+	*/
+	
+	// Render ImGui
+	ImGui::Render();
+	ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), renderer);
+
+	SDL_RenderPresent(renderer);
+}
+
+void MainApplication::drawMenu() {
+	ImGui::Begin("Drawing Menu");
+	ImGui::Text("Application: Filter Structure Diagram");
+	ImGui::Button("Branch");
+	ImGui::Button("Delay");
+	ImGui::Button("Multiplier");
+	ImGui::Button("Sum");
+	ImGui::Button("Node");
+	if (ImGui::Button("Clear")) {
+	  //state->blocks.clear();
+	}
+	ImGui::End();
+}
+
+void MainApplication::initialize() {
+	// Setup Dear ImGui
+	//IMGUI_CHECKVERSION();
+	context = ImGui::CreateContext();
+	ImGui::SetCurrentContext(context);
+	
+	ImGui::StyleColorsDark();
+	
+	ImGui_ImplSDL3_InitForSDLRenderer(window, renderer);
+	ImGui_ImplSDLRenderer3_Init(renderer);
+}
+

@@ -27,7 +27,6 @@ find_package(OpenCV REQUIRED)
 add_executable(control
     main.cpp
     application.cpp
-    mainapplication.cpp
     editorapplication.cpp
 )
 target_include_directories(control PRIVATE

@@ -29,9 +29,24 @@ class SDLRenderer : public IRenderer {
 
 class Application {
 	public:
-		Application() : Application(nullptr, nullptr) { }
-		Application(SDL_Window* w, SDL_Renderer* r) : window(w), renderer(r) { }
+		Application(SDL_Window* w, SDL_Renderer* r) : window(w), renderer(r) { initialize(); }
 		virtual ~Application();
+		virtual void loop();
+		void callback(SDL_Event* event);
+		virtual void draw();
+		virtual void drawMenu();
+		ImGuiContext* context;	
+		virtual void initialize();
+	protected:
+		SDL_Window* window;
+		SDL_Renderer* renderer;
+};
+
+class AlternateApplication {
+	public:
+		AlternateApplication() : AlternateApplication(nullptr, nullptr) { }
+		AlternateApplication(SDL_Window* w, SDL_Renderer* r) : window(w), renderer(r) { }
+		virtual ~AlternateApplication();
 		virtual SDL_AppResult loop();
 		virtual SDL_AppResult callback(SDL_Event* event);
 		virtual void draw();
@@ -48,12 +63,12 @@ class Application {
 		const int DEFAULT_HEIGHT = 720;
 };
 
-
-class MenuApplication : public Application {
+/*
+class MenuApplication : public AlternateApplication {
 	public:
-		MenuApplication() : Application() { }
-		MenuApplication(SDL_Window* w, SDL_Renderer* r) : Application(w, r) { }
-		~MenuApplication();
+		AlternateMainApplication() : AlternateApplication() { }
+		AlternateMainApplication(SDL_Window* w, SDL_Renderer* r) : AlternateApplication(w, r) { }
+		~AlternateMainApplication();
 		SDL_AppResult loop() override;
 		SDL_AppResult callback(SDL_Event* event) override;
 		void draw() override;
@@ -62,3 +77,4 @@ class MenuApplication : public Application {
 	protected:
     	    ImGuiContext* context;
 };
+*/

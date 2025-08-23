@@ -5,11 +5,11 @@
 //#include <opencv2/opencv.hpp>
 //#include <iostream>
 
-#include "mainapplication.hpp"
+#include "application.hpp"
 
 // Example app state
 struct AppState {
-    AlternateMainApplication *mainApplication;
+    MenuApplication *application;
 };
 
 static inline SDL_WindowID eventWindowID(const SDL_Event& e);
@@ -22,9 +22,9 @@ SDL_AppResult SDL_AppInit(void **appstate, int argc, char *argv[]) {
         SDL_Log("Failed to init SDL: %s", SDL_GetError());
         return SDL_APP_FAILURE;
     }
-    state->mainApplication =  new AlternateMainApplication();
+    state->application =  new MenuApplication();
 
-    return state->mainApplication->initialize();
+    return state->application->initialize();
 }
 
 SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
@@ -38,13 +38,13 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
     if (windowID) {
             /*
 	    if (state->mainWindow && windowID == SDL_GetWindowID(state->mainWindow)) {
-		    state->mainApplication->callback(event);
+		    state->application->callback(event);
 	    } else if (state->editorWindow && event->window.windowID == SDL_GetWindowID(state->editorWindow)) {
 		    state->editorApplication->callback(event);
 	    }
 	    */
-	    if (windowID == state->mainApplication->getWindowID()) {
-	        return state->mainApplication->callback(event);
+	    if (windowID == state->application->getWindowID()) {
+	        return state->application->callback(event);
 	    }
     }
     
@@ -62,13 +62,13 @@ SDL_AppResult SDL_AppEvent(void *appstate, SDL_Event *event) {
 SDL_AppResult SDL_AppIterate(void *appstate) {
     auto *state = static_cast<AppState *>(appstate);
     
-    return state->mainApplication->loop();
+    return state->application->loop();
 }
 
 void SDL_AppQuit(void *appstate, SDL_AppResult result) {
     auto *state = static_cast<AppState *>(appstate);
 
-    delete state->mainApplication;
+    delete state->application;
     delete state;
 
     SDL_Quit();
